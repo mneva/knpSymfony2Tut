@@ -2,19 +2,27 @@
 # http://symfony.com/doc/current/book/security.html
 security:
 
+    encoders:
+        Yoda\UserBundle\Entity\User: bcrypt
+
+    role_hierarchy:
+        ROLE_ADMIN:   [ROLE_USER, ROLE_EVENT_CREATE, ROLE_ALLOWED_TO_SWITCH]
+        ROLE_SUPER_ADMIN: [ROLE_USER, ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
     # http://symfony.com/doc/current/book/security.html#where-do-users-come-from-user-providers
     providers:
-        in_memory:
-            memory: ~
+        our_database_users:
+            entity: { class: UserBundle:User }
 
     firewalls:
         # disables authentication for assets and the profiler, adapt it according to your needs
-        dev:
-            pattern: ^/(_(profiler|wdt)|css|images|js)/
-            security: false
+        #dev:
+        #    pattern: ^/(_(profiler|wdt)|css|images|js)/
+        #    security: false
 
-        main:
-            anonymous: ~
+       # main:
+
+           # always_remember_me: true
+         #   anonymous: ~
             # activate different ways to authenticate
 
             # http_basic: ~
@@ -22,3 +30,29 @@ security:
 
             # form_login: ~
             # http://symfony.com/doc/current/cookbook/security/form_login_setup.html
+        secured_area:
+          pattern:  ^/
+          form_login:
+            check_path: login_check
+            login_path: login_form
+            remember_me: true
+          logout:
+            path:   logout
+            target: event
+          anonymous: ~
+          remember_me:
+            secret: '%secret%'
+            lifetime: 604800
+            path: /
+          #http_basic:
+          #  realm: "Secured Demo Area"
+          switch_user: ~
+
+
+    access_control:
+        - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/(css|js), roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/(_wdt|_profiler), roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/, roles: ROLE_USER }
+
