@@ -1,0 +1,60 @@
+{% extends 'EventBundle::layout.html.twig' %}
+
+{% block body %}
+    <h1>Event list</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Time</th>
+                <th>Location</th>
+                <th>Details</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {#{% for event in events %}
+            <tr>
+                <td><a href="{{ path('event_show', { 'slug': event.slug }) }}">{{ event.name }}</a></td>
+                <td>{{ event.name }}</td>
+                <td>{% if event.time %}{{ event.time|date('Y-m-d H:i:s') }}{% endif %}</td>
+                <td>{{ event.location }}</td>
+                <td>{{ event.details }}</td>
+                <td>
+                    <ul>
+                        <li>
+                            <a class="link" href="{{ path('event_show', { 'slug': event.slug }) }}">show event</a>
+                        </li>
+                        <li>
+                            <a href="{{ path('event_edit', { 'id': event.id }) }}">edit</a>
+                        </li>
+                    </ul>
+                </td>
+                <dd>{{ event.attendees|length }} attending</dd>
+            </tr>
+        {% endfor %}#}
+            <section class="events">
+                {{ render(controller('EventBundle:Event:_upcomingEvents')) }}
+            </section>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a class="button" href="{{ path('event_new') }}">Create a new entry</a>
+        </li>
+        {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+            <li>
+                <a class="link" href="{{ path('logout') }}">
+                    Logout {{ app.user.username }}
+                </a>
+            </li>
+        {% else %}
+            <li>
+                <a class="link" href="{{ path('login_form') }}">Login</a>
+            </li>
+        {% endif %}
+    </ul>
+{% endblock %}

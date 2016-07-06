@@ -1,0 +1,95 @@
+{% extends 'EventBundle::layout.html.twig' %}
+
+{% block body %}
+    <h1>Event</h1>
+    <table>
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ event.id }}</td>
+            </tr>
+            <tr>
+                <th>Name</th>
+                <td>{{ event.name }}</td>
+            </tr>
+            <tr>
+                <th>Time</th>
+                <td>{% if event.time %}{{ event.time|date('Y-m-d H:i:s') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Location</th>
+                <td>{{ event.location }}</td>
+            </tr>
+            <tr>
+                <th>Details</th>
+                <td>{{ event.details }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('event') }}">Back to the list</a>
+        </li>
+        {% if app.user == event.owner %}
+            <li>
+                <a class="button" href="{{ path('event_edit', { 'id': event.id }) }}">Edit</a>
+            </li>
+        {% endif %}
+        <li>
+            {{ form_start(delete_form) }}
+                <input type="submit" value="Delete">
+            {{ form_end(delete_form) }}
+        </li>
+    </ul>
+
+    <dt>who: </dt>
+    <dd>
+        {{ event.attendees|length }} attending!
+
+        <ul>
+            {% for attendee in event.attendees %}
+                <li>{{ attendee }}</li>
+            {% else %}
+                <li>nobody yet!</li>
+            {% endfor %}
+        </ul>
+        {% if event.hasAttendee(app.user) %}
+            <a href="{{ path('event_unattend', {'id': event.id}) }}"
+               class="btn btn-warning btn-xs js-attend-toggle">
+                Oh no! I can't go anymore!
+            </a>
+        {% else %}
+            <a href="{{ path('event_attend', {'id': event.id}) }}"
+               class="btn btn-success btn-xs js-attend-toggle">
+                I totally want to go!
+            </a>
+        {% endif %}
+    </dd>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        $(document).ready(function() {
+            $('.js-attend-toggle').on('click', function(e) {
+               //prevents the browser from following the link
+                e.preventDefault();
+
+                var $anchor = $(this);
+                var url = $(this).attr('href')+'.json';
+
+                $.post(url, null, function(data) {
+                    if (data.attending) {
+                        var message = 'See you there';
+                    } else {
+                        var message = 'We\'ll miss you!';
+                    }
+
+                    $anchor.after('<span class="label label-default">&#10004; '+message+'</span>');
+                    $anchor.hide();
+                });
+            });
+        });
+    </script>
+{% endblock %}
